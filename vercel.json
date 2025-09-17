@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:patch*",
+            "destination": "https://one023b-backend-novo.onrender.com/:patch*"
+        }
+    ]
+}

@@ -22,11 +22,11 @@ export default function App() {
       <div>MICHAEL</div>
       {
         produtos.map((produto) => (
-          <div> key={produto._id}
+          <div key={produto._id}>
             <h2>{produto.nome}</h2>
             <p>{produto.descricao}</p>
             <p>{produto.preco}</p>
-            <img src="{produto.urlfoto}" alt="{produto.nome}" width="200" /></div>
+            <img src={produto.urlfoto} alt={produto.nome} width="200" /></div>
         ))
       }
     </>

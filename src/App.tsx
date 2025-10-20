@@ -1,5 +1,6 @@
 import './App.css'
-//useeffect
+import api from './api/api'
+
 import { useEffect, useState } from 'react'
 type ProdutoType = {
   _id: string,
@@ -12,10 +13,12 @@ type ProdutoType = {
 function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([])
   useEffect(() => {
-    fetch('/api/produtos')
-      .then((response) => response.json())
-      .then((data) => setProdutos(data))
+    api.get('/produtos')
+      .then((response) => setProdutos(response.data))
+      .catch((error) => console.error('Error fetching data:', error))
+
   }, [])
+
   function handleForm(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
@@ -26,53 +29,49 @@ function App() {
       urlfoto: formData.get('urlfoto') as string,
       descricao: formData.get('descricao') as string
     }
-    
-    fetch('/api/produtos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then((response) => response.json())
-      .then((newProduto) => setProdutos([...produtos, newProduto]))
-      .catch((error) => console.error('Error posting data:', error))
+    api.post('/produtos', data)
+      .then((response) => setProdutos([...produtos, response.data]))
+      .catch((error) => {
+        console.error('Error posting data:', error)
+        alert('Error posting data:' +error?.message)
+      })
     form.reset()
   }
+
   function adicionarCarrinho(produtoId: string) {
-    const usuarioId = "12233"
-     const quantidade = 1; 
-    fetch('/api/carrinho/adicionarItem', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ produtoId, usuarioId, quantidade })
-    })
+    api.post('/carrinho/adicionarItem', { produtoId, quantidade: 1 })
+      .then(() => alert('Produto adicionado ao carrinho!'))
+      .catch((error) => {
+        console.error('Error posting data:', error)
+        alert('Error posting data:' +error?.message)
+      })
+
+
   }
-  return ( 
-  <>
-  <div>Cadastro de Produtos</div>
-  <form onSubmit={handleForm}>
-    <input type="text" name="nome" placeholder="Nome" />
-    <input type="number" name="preco" placeholder="Preço" />
-    <input type="text" name="urlfoto" placeholder="URL da Foto" />
-    <input type="text" name="descricao" placeholder="Descrição" />
-    <button type="submit">Cadastrar</button>
-  </form>
-  <div>Lista de Produtos</div>
-  {
-    produtos.map((produto) => (
-      <div key={produto._id}>
-        <h2>{produto.nome}</h2>
-        <p>R$ {produto.preco}</p>
-        <img src={produto.urlfoto} alt={produto.nome} width="200" />
-        <p>{produto.descricao}</p>
-        <button onClick={() => adicionarCarrinho(produto._id)}>Adicionar ao carrinho</button>
-      </div>
-    ))
-  }
-  </>
-   )
+
+  return (
+    <>
+      <div>Cadastro de Produtos</div>
+      <form onSubmit={handleForm}>
+        <input type="text" name="nome" placeholder="Nome" />
+        <input type="number" name="preco" placeholder="Preço" />
+        <input type="text" name="urlfoto" placeholder="URL da Foto" />
+        <input type="text" name="descricao" placeholder="Descrição" />
+        <button type="submit">Cadastrar</button>
+      </form>
+      <div>Lista de Produtos</div>
+      {
+        produtos.map((produto) => (
+          <div key={produto._id}>
+            <h2>{produto.nome}</h2>
+            <p>R$ {produto.preco}</p>
+            <img src={produto.urlfoto} alt={produto.nome} width="200" />
+            <p>{produto.descricao}</p>
+            <button onClick={() => adicionarCarrinho(produto._id)}>Adicionar ao carrinho</button>
+          </div>
+        ))
+      }
+    </>
+  )
 }
 export default App
